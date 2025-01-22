@@ -70,5 +70,23 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"message": "Recordatorio enviado exitosamente"})
 	})
 
+	r.GET("/reservation-details", func(c *gin.Context) {
+		reservationID := c.Query("reservation_id") // Obtener el parámetro desde la URL
+
+		var name, email, date string
+		err := db.QueryRow("SELECT name, email, reservation_date FROM reservations WHERE id = ?", reservationID).Scan(&name, &email, &date)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Reservación no encontrada"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"reservation_id":   reservationID,
+			"name":             name,
+			"email":            email,
+			"reservation_date": date,
+		})
+	})
+
 	r.Run(":8080") // Escuchar en el puerto 8080
 }
